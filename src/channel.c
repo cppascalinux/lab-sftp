@@ -570,6 +570,7 @@ int ssh_channel_read(ssh_channel channel, void *dest, uint32_t count) {
                 ssh_buffer_get_data(buf, dest, count);
                 dest += count, nread += count;
                 len -= count;
+                len = ntohl(len);
                 ssh_buffer_prepend_data(buf, &len, sizeof(uint32_t));
                 count = 0;
             }
@@ -593,7 +594,7 @@ int ssh_channel_read(ssh_channel channel, void *dest, uint32_t count) {
                 case SSH_MSG_CHANNEL_WINDOW_ADJUST:
                     /* window adjust message could happen here */
                     // LAB: insert your code here. (finished)
-                    rc = ssh_buffer_get_u32(session->in_buffer, &bytes_to_add);
+                    rc = ssh_buffer_unpack(session->in_buffer, "d", &bytes_to_add);
                     channel->remote_window += bytes_to_add;
                     break;
 
@@ -607,11 +608,12 @@ int ssh_channel_read(ssh_channel channel, void *dest, uint32_t count) {
                 case SSH_MSG_CHANNEL_EOF:
                     // LAB: insert your code here. (finished)
                     channel->remote_eof = 1;
-                    goto cleanup;
+                    break;
 
                 case SSH_MSG_CHANNEL_CLOSE:
                     // LAB: insert your code here. (finished)
-                    goto cleanup;
+                    channel->remote_eof = 1;
+                    break;
 
                 case SSH_MSG_CHANNEL_REQUEST:
                     // LAB: insert your code here. (finished)

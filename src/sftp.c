@@ -386,8 +386,6 @@ int32_t sftp_read(sftp_file file, void *buf, uint32_t count) {
     switch (response->type) {
         // LAB: insert your code here. (finished)
         case SSH_FXP_DATA:
-            data = calloc(1, sizeof(struct ssh_string_struct));
-            if (data == NULL) return SSH_ERROR;
             rc = ssh_buffer_unpack(response->payload, "dS", &recv_id, &data);
             if (rc != SSH_OK || data == NULL) return SSH_ERROR;
             if (id != recv_id) {
@@ -397,8 +395,11 @@ int32_t sftp_read(sftp_file file, void *buf, uint32_t count) {
                 SAFE_FREE(data);
                 return SSH_ERROR;
             }
-            memcpy(buf, data->data, MIN(data->size, count));
-            return MIN(data->size, count);
+            uint32_t len = MIN(ntohl(data->size), count);
+            memcpy(buf, data->data, len);
+            if (ntohl(data->size) <= count) file->eof = 1;
+            SAFE_FREE(data);
+            return len;
 
         case SSH_FXP_STATUS:
             status = sftp_parse_status(response);
@@ -469,6 +470,7 @@ int32_t sftp_write(sftp_file file, const void *buf, uint32_t count) {
                 return SSH_ERROR;
 
         }
+        nleft -= nwrite;
     }
     return count - nleft;
 }
