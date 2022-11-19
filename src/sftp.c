@@ -397,7 +397,8 @@ int32_t sftp_read(sftp_file file, void *buf, uint32_t count) {
             }
             uint32_t len = MIN(ntohl(data->size), count);
             memcpy(buf, data->data, len);
-            if (ntohl(data->size) <= count) file->eof = 1;
+            if (ntohl(data->size) < count) file->eof = 1;
+            file->offset += MIN(ntohl(data->size), count);
             SAFE_FREE(data);
             return len;
 
@@ -463,6 +464,7 @@ int32_t sftp_write(sftp_file file, const void *buf, uint32_t count) {
             case SSH_FXP_STATUS:
                 status = sftp_parse_status(response);
                 sftp_status_free(status);
+                file->offset += nwrite;
                 break;
             
             default:

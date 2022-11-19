@@ -601,6 +601,9 @@ int ssh_channel_read(ssh_channel channel, void *dest, uint32_t count) {
                 case SSH_MSG_CHANNEL_DATA:
                     // LAB: insert your code here. (finished)
                     channel_data = ssh_buffer_get_ssh_string(session->in_buffer);
+                    int len = ntohl(channel_data->size);
+                    channel->local_window -= len;
+                    
                     ssh_buffer_add_ssh_string(buf, channel_data);
                     ssh_string_free(channel_data);
                     break;
@@ -608,12 +611,12 @@ int ssh_channel_read(ssh_channel channel, void *dest, uint32_t count) {
                 case SSH_MSG_CHANNEL_EOF:
                     // LAB: insert your code here. (finished)
                     channel->remote_eof = 1;
-                    break;
+                    goto cleanup;
 
                 case SSH_MSG_CHANNEL_CLOSE:
                     // LAB: insert your code here. (finished)
                     channel->remote_eof = 1;
-                    break;
+                    goto cleanup;
 
                 case SSH_MSG_CHANNEL_REQUEST:
                     // LAB: insert your code here. (finished)
