@@ -203,6 +203,7 @@ int receive_id_str(ssh_session session) {
         if (ssh_start >= 0 && i >= 1 && !strncmp(buffer + i - 1, "\r\n", 2)) {
             ssh_end = i - 1;
             session->server_id_str = strndup(buffer + ssh_start,ssh_end - ssh_start);
+            LOG_NOTICE("server ssh version: %s", session->server_id_str);
             return SSH_OK;
         }
     }

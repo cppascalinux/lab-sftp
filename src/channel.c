@@ -256,6 +256,12 @@ static int channel_request(ssh_channel channel, const char *request, int reply,
 
         switch (type) {
             case SSH_MSG_CHANNEL_SUCCESS:
+                LOG_NOTICE("Channel open successful:");
+                printf("Local channel: %d\n"
+                     "Local window size: %d\nRemote channel: %d\n"
+                     "Remote window size: %d\n", channel->local_channel,
+                     channel->local_window, channel->remote_channel,
+                     channel->remote_window);
                 return SSH_OK;
             case SSH_MSG_CHANNEL_FAILURE:
                 return SSH_ERROR;

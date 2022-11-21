@@ -233,6 +233,7 @@ int ssh_select_kex(ssh_session session) {
     struct ssh_kex_struct *server = &session->next_crypto->server_kex;
     struct ssh_kex_struct *client = &session->next_crypto->client_kex;
 
+    LOG_NOTICE("Selecting cipher suite:");
     for (int i = 0; i < SSH_KEX_METHODS; ++i) {
         /* select negotiated algorithms and store them in `next_crypto->kex_methods` */
         // LAB: insert your code here. (finished)
@@ -240,6 +241,7 @@ int ssh_select_kex(ssh_session session) {
         char *sser = session->next_crypto->server_kex.methods[i];
         if (!strstr(sser, scli)) goto error;
         session->next_crypto->kex_methods[i] = strdup(scli);
+        printf("\"%s\"\n", session->next_crypto->kex_methods[i]);
 
     }
     session->next_crypto->kex_type = SSH_KEX_DH_GROUP14_SHA256;
